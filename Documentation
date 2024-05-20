@@ -1,0 +1,371 @@
+4.1 Network Simulation
+ This part of Python script generates graphs by employing the NetworkX library
+ module. The functionality of the code is summarised as follows:
+ Importing Libraries
+ Networkx, matplotlib.pyplot, and random are the packages of libraries that the
+ script imports. 4.1
+ Defining Function
+ • Anetwork topology is able to read from a file using the read topology(filepath)
+ function.
+ • Agraph object from NetworkX is initialised.
+ • It reads the file and analyse edges and nodes portions.
+ • The graph utilises G.addnode() to add nodes.
+ • G.add edge() with weights is used to add edges to the graph.
+ Figure 4.1: Read Topology
+ 10
+Code Analysis
+ • The script reads a file with network node and edge information in it. 4.2
+ • It makes a distinction between the file’s ”Nodes:” and ”Edges:” parts.
+ • Individual nodes are added to the graph.
+ • Between nodes, edges with matching weights are added.
+ • Selecting middle points.
+ • Analysing route flow and generating random flow demands.
+ Figure 4.2: Code Analysis
+ Graph Visualization
+ NetworkX and matplotlib module is imported to this program for graph visualiza
+tion, but for the further DRL processes, we’ll call this function later, once we’re
+ done with the ML part.
+ To summarise, this Python script uses NetworkX to generate a graph representation
+ of the network topology, loads nodes and edges into the graph depending on the
+ information in the file, and gets the network topology from it. It acts as a first step
+ towards further in-depth network research or visualisation.
+ 4.2 Machine Learning Simulation
+ This part of code is also a Python script that uses PyTorch to create a Deep Rein
+forcement Learning (DRL) model. The model’s goal is to forecast the quantity of
+ successful demand flows for various network topologies by learning from input data
+ pertaining to flow needs and topologies.
+ 11
+Import Statements
+ PyTorch, NumPy, and the neural network and optimisation modules are imported,
+ along with other relevant Python librariesnodes. Figure 4.3
+ DRLModel Category
+ A straightforward feedforward neural network design with three linear layers is de
+f
+ ined by this class. When it is initialised, input and output dimensions are sent in
+ as parameters.
+ Figure 4.3: ML Simulation
+ Preprocessing Operations
+ Preprocess input: This function creates PyTorch tensors that may be used to train
+ the model using the input data, which consists of chosen middle points, flow needs,
+ and topological properties.
+ Reprocess output: This function creates PyTorch tensors from the output data
+ (success counts).
+ Training Function
+ The DRLmodel is trained via the train drl model function. The model’s parameters
+ are updated iteratively over a predetermined number of epochs in accordance with
+ the Mean Squared Error (MSE) loss between the expected and actual outputs.
+ Figure 4.4
+ Figure 4.4: Tranning Function
+ 12
+Reading Topology Files
+ Nodes and edges information is extracted from Topology files by using the read
+ topology file function.
+ Extracting Features from Topology
+ The nodes and edges from a topology file are sent into the extract topology features
+ function, which outputs a tensor with the number of nodes and edges as features.
+ Main Execution
+ The read topology file and extract topology features functions are used to load and
+ process the topology data from files. Figure 4.5 Dictionary definitions apply to
+ the input data (chosen middle points and flow demands) and output data (success
+ counts). The supplied data is used to calculate the input and output dimensions.
+ Both the optimizer and the DRL model are initialised. The preprocess input and
+ preprocess output functions are used, respectively, to preprocess the input and out
+put data. The preprocessed input and output tensors are used to train the DRL
+ model by calling the train drl model function.
+ Figure 4.5: Main Code
+ Given the chosen intermediate points and flow needs, the code looks to be a simu
+lation or experiment to train a DRL model for estimating the number of successful
+ demand flows in various network topologies. The model takes the topology features,
+ selected middle points, and flow demands as input and predicts the success counts
+ for different numbers of demand flows.
+
+
+
+
+ 5.1 Training a Model for Midpoint Optimization
+ (Segment Routing)
+ This section dives deeper into the training process of the model used for optimiz
+ing midpoint selection in Segment Routing (SR). We’ll explore each step in detail,
+ focusing on the chosen Support Vector Machine (SVM) model.
+ Data Preparation Breakdown
+ Network Topology Data
+ The first step in training our model involves understanding the network itself. Here,
+ a program called read topology file takes on the task of reading text files that de
+scribe the network layout. Imagine these files as blueprints for the network, where
+ each important location is like a city (called a node) and the connections between
+ them are like roads (called edges). This function essentially reads this information
+ and translates it into a format a computer can understand.
+ But simply knowing there are locations and connections isn’t enough. To give our
+ model a better understanding of the network’s structure, another program called
+ extract topology features jumps in. This function analyzes the information from the
+ f
+ irst program, focusing on extracting relevant numerical details. This could involve
+ calculating things like the total number of locations (nodes) in the network, the
+ average distance between them, or even identifying if there are any special elements
+ present within the network (like particularly congested connections).[1] By gathering
+ this kind of numerical data, we can provide the model with a more comprehensive
+ picture of the network’s overall layout and characteristics.
+ Traffic Flow Data
+ • This data plays a crucial role in understanding how traffic flows within the
+ network. It’s organized like a nested dictionary, with each network topology
+ serving as a key. Within each network’s dictionary, we find two important
+ pieces of information.
+ • Thefirst, called selected middle points, is essentially a list of pitstops. Imagine
+ different routes through the network, each potentially with varying rest stops
+ 14
+(middle points) for the traffic flow. This list uses letters like ”A,” ”B,” and
+ ”C” to represent these chosen intermediate nodes.
+ • The second piece of information, named flow demands, dives deeper into the
+ specifics of traffic flow. It’s like a detailed record of all the trips happening
+ within the network. Each record, called a ”tuple,” contains three parts: the
+ starting point (source node), the ending point (destination node), and the
+ amount of traffic (number of packets) that needs to travel between them. By
+ combining this information with the chosen middle points, we get a rich un
+derstanding of how much traffic is flowing where and how people are choosing
+ to route it.
+ • This data reflects how well traffic flowed for each scenario within a network
+ topology. It’s also provided as a dictionary with each network topology as a
+ key.
+ • The value for each topology is another dictionary where each key represents a
+ f
+ low scenario (identified by a number) and the value represents the number of
+ successfully routed flows for that scenario. This essentially tells us how many
+ ”cars” made it through a specific traffic flow scenario (considering the chosen
+ middle points).
+ Preprocessing Functions
+ The preprocess input function transforms the raw data into a format suitable for
+ the SVM model:
+ • One-Hot Encoding: It converts the character representations of middle points
+ (A, B, C) into numerical vectors. Imagine each character A, B, C being
+ mapped to a unique code (e.g., [1, 0, 0] for A, [0, 1, 0] for B, and [0, 0,
+ 1] for C). This allows the model to understand the difference between these
+ points.
+ • Numerical Conversion: Flow demand information (source, destination, de
+mand) is converted into numerical values. This could involve converting node
+ names to unique identifiers or demand (number of packets) into a common
+ scale.
+ • Feature Vector Creation: Finally, the processed middle points, flow demands,
+ and extracted topology features are combined into a single ”feature vector”
+ for each traffic flow scenario within a network topology. This vector becomes
+ the input data for the SVM model.
+ • Thepreprocess output function transforms the success data from each network
+ topology into a single target value for the SVM model. This target value
+ typically represents the number of successfully routed flows for that specific
+ network topology (considering all flow scenarios within it).
+ SVM Model Selection
+ This project utilizes an SVM model due to its effectiveness in classification tasks.
+ Here’s why SVM is a good fit:
+ 15
+• We use an SVM (Support Vector Machine) because it’s good at finding pat
+terns in data.[5] In our case, the model will learn the patterns between
+ • Network information: This includes things like the number of locations and
+ connections.
+ • Traffic demands: This tells the model how much traffic there is between loca
+tions.
+ Training Process
+ • Model Implementation: A library like scikit-learn is used to implement the
+ chosen SVM model. This involves defining the specific type of SVM (e.g.,
+ linear SVM) and setting hyperparameters (control knobs) that influence the
+ model’s learning behavior.
+ • Iterative Learning: The model is trained for a specified number of epochs
+ (iterations). In each epoch:– The model takes a batch of feature vectors (representing traffic flow sce
+narios) and their corresponding target values (number of successfully
+ routed flows) as input.– The model analyzes the data and learns the relationship between the
+ features (network, traffic, middle points) and the target values.– The model updates its internal parameters (think of them as decision
+making rules) to improve its ability to predict the optimize number of
+ middle point
+ 5.2 Testing without Middle Point
+ The testing process aims to assess how well we trained DRL model optimize to
+ unseen network configurations with and without middle points.
+ 5.2.1 Preprocessing Test Data Without Middle Points
+ The preprocess test input function is designed to prepare input data for the model’s
+ prediction by transforming flow demands and topology features into a format suit
+able for the model. It takes two dictionaries, test input data and test topology data,
+ as input.
+ For each topology in the test input data dictionary, the function iterates through
+ the flow demands associated with that topology. Each flow demand, consisting of a
+ source node, destination node, and demand value, is transformed into a numerical
+ tensor. This transformation involves converting the source and destination nodes,
+ represented as letters, into numerical indices and creating a tensor that includes
+ these indices along with the corresponding demand values.
+ Furthermore, the function retrieves the topology features associated with the cur
+rent topology from the test topology data dictionary based on the topology name.
+ 16
+These topology features capture structural characteristics of the network that may
+ influence routing decisions.
+ Finally, for each topology, the function combines the flow demand tensor and the
+ topology feature tensor into a single tensor. This comprehensive representation of
+ the network for each topology is stored in a new dictionary named test input tensors.
+ In summary, the preprocess test input function facilitates the transformation of raw
+ input data into a format that the DRL model can effectively process for predicting
+ optimal routing decisions.
+ 5.2.2 Testing Without Middle Points
+ The test DRL model function is designed to leverage the trained DRL model to
+ predict the optimal number of middle points for routing traffic in new network con
+f
+ igurations. It takes three arguments: the trained DRL model itself, the test input
+ tensors dictionary containing preprocessed data for the new topologies, and the test
+ topology data dictionary containing raw topology features necessary for prediction.
+ Upon invocation, the function iterates through each topology in the test input ten
+sors dictionary. For each topology, the trained DRL model is employed to predict
+ an action, where the action corresponds to the optimal number of middle points for
+ routing traffic in the specific network configuration. This prediction is crucial for
+ optimizing network performance and resource utilization.
+ To enhance efficiency during prediction, the function utilizes the torch.no grad()
+ context manager, temporarily disabling the calculation of gradients. Since gradients
+ are unnecessary for making predictions, this optimization reduces computational
+ overhead, resulting in faster inference times.
+ The model generates a set of values representing the predicted outcomes for each
+ possible action. The function then selects the action with the highest predicted
+ value, indicating the optimal number of middle points for that particular network
+ configuration. Notably, to align with typical indexing conventions, 1 is added to the
+ chosen index to account for the zero-based indexing used in Python.
+ Upon completion, the function returns a dictionary named predictions, mapping
+ each topology name to the predicted optimal number of middle points. This dictio
+nary serves as a valuable resource for network administrators and engineers, provid
+ing insights into the most effective routing strategies for diverse network configura
+tions.
+ 5.2.3 Evaluating Testing Without Middle Points
+ The evaluation culminates in an assessment of prediction accuracy, a pivotal metric
+ indicative of the model’s efficacy in predicting optimal middle points. The calculate
+ 17
+accuracy function compares predicted outcomes against ground truth data, quanti
+fying the model’s performance in accurately identifying the optimal routing strategy
+ for each topology. In the presented scenario, the prediction accuracy is calculated
+ to be 0.4, signifying moderate success in predicting optimal middle points across the
+ tested network configurations.
+ 5.3 Testing With Middle Points
+ 5.3.1 Preprocessing Test Data With Middle Points
+ The data preprocessing phase, orchestrated by the preprocess testing input function,
+ is fundamental for readying the testing data to suit the DRL model’s input require
+ments. This function systematically transforms raw testing data, encompassing flow
+ demands and topology features, into a structured format. It undertakes several piv
+otal steps to achieve this: foremost, it encodes selected middle points into one-hot
+ tensors, ensuring that categorical data representing these points is converted into a
+ numerical format amenable to the model’s processing. Next, flow demands, compris
+ing source and destination nodes alongside demand values, undergo a transformation
+ into numerical tensors. This conversion involves mapping node names to numerical
+ indices and synthesizing tensors to represent each flow demand. Concurrently, the
+ function retrieves topology features from preprocessed data, encapsulating essential
+ structural characteristics of the network. These features are pivotal in influencing
+ subsequent routing decisions. Lastly, for each topology, the function amalgamates
+ the transformed flow demand tensor and the topology feature tensor into a cohesive
+ unit. This comprehensive representation of the network, tailored for each topology,
+ sets the stage for effective prediction by the DRL model.
+ 5.3.2 Testing With Middle Points
+ The prediction phase hinges on leveraging the trained DRL model to prognosticate
+ the optimal number of middle points for traffic routing across new network con
+f
+ igurations. Spearheading this effort is the predict success counts function, which
+ orchestrates several key steps to derive actionable insights. Primarily, the function
+ harnesses the trained DRL model to generate predictions, with each prediction corre
+sponding to an action representing the optimal number of middle points for a given
+ topology. This selection process is informed by the model’s prediction of success
+ counts, allowing for the identification of the most effective routing strategy tailored
+ to each network configuration. To bolster efficiency during this predictive endeavor,
+ the function judiciously employs the torch.no grad() context manager, temporar
+ily suspending gradient calculations. This optimization minimizes computational
+ overhead, thereby expediting the inference process and ensuring swift insights into
+ optimal routing strategies.
+ 18
+5.3.3 Evaluation Testing With Middle Points
+ The evaluation module serves as the litmus test for assessing the performance of the
+ DRL model in predicting optimal middle points for network traffic routing. Central
+ to this evaluation is the calculation of accuracy, a metric derived from a compari
+son between predicted optimal middle point counts and their corresponding actual
+ values. However, the evaluation’s efficacy is constrained by the absence of complete
+ ground truth data, thereby limiting the assessment to partial results. Nevertheless,
+ the calculated accuracy of 0.2 suggests moderate performance, with the model ac
+curately predicting optimal middle points for 2 out of the 5 tested topologies. To
+ fortify the evaluation, it is imperative to procure missing ground truth data for all
+ tested topologies and contemplate the integration of supplementary metrics, such
+ as the F1 score. Furthermore, exploring avenues to enhance model performance
+ and discerning the impact of predicted middle points on routing efficiency stand as
+ promising avenues for future research and refinement
+ 5.4 Limitations and Use Cases
+ The project demonstrates the potential of utilizing a Deep Reinforcement Learning
+ (DRL)modeltopredict optimal numbers of middle points for network traffic routing,
+ offering valuable applications across various use cases. In the context of congestion
+ control (UC-1.1), the model’s predictions could dynamically reroute traffic during
+ peak hours, effectively alleviating congestion and improving overall network perfor
+mance. Additionally, in scenarios focused on optimal resource utilization (UC-1.2),
+ the model could play a pivotal role in selecting routing paths based on real-time
+ traffic conditions and Quality of Service (QoS) requirements, ultimately leading to
+ more efficient resource allocation.
+ However, the evaluation of the model has identified certain limitations that need
+ to be addressed. Firstly, the accuracy of the model requires improvement to en
+sure reliable predictions, especially in dynamic network environments. Additionally,
+ while the model’s predictions show promise, it is crucial to validate the impact of
+ predicted middle points on actual routing efficiency to ensure their effectiveness in
+ practical scenarios. Furthermore, incorporating evaluation metrics like the F1 score
+ would provide a more nuanced understanding of the model’s performance, capturing
+ both precision and recall aspects.
+ To enhance the project’s effectiveness and applicability, several recommendations
+ for improvement have been suggested. Firstly, gathering missing ground truth data
+ would facilitate a more robust evaluation, particularly in scenarios related to opti
+mal resource utilization. Secondly, exploring techniques to enhance model accuracy
+ and performance is essential for ensuring reliable predictions in diverse network en
+vironments. Lastly, analyzing the impact of predicted middle points in real-world
+ routing scenarios would provide valuable insights into their practical efficacy.
+ In summary, while the project exhibits promise in addressing congestion control
+ and optimal resource utilization use cases, further development and refinement are
+ necessary to overcome identified limitations and validate its effectiveness in real
+19
+world network scenarios. By addressing these challenges and implementing the
+ recommended improvements, the project can realize its full potential in optimizing
+ network traffic routing strategies.
+
+
+User Documentation
+ 6.1 Introduction
+ Welcome to the comprehensive user documentation for the Network Optimization
+ Tool. This guide is designed to provide users with an in-depth understanding of the
+ tool’s functionality, features, and usage scenarios. Whether you’re a novice exploring
+ network optimization or an experienced practitioner seeking advanced customization
+ options, this documentation aims to cater to your needs.
+ 6.2 Getting Started
+ Before diving into the tool’s features, it’s essential to ensure that it is properly
+ installed on your system. Detailed installation instructions for various operating
+ systems can be found in the README file included with the tool’s distribution
+ package. Once installed, launching the tool is straightforward– simply execute the
+ provided executable file or access it via the command line interface (CLI).
+ 6.3 Loading Topologies
+ One of the core functionalities of the Network Optimization Tool is the ability to
+ work with predefined network topologies. These topologies are stored in text files
+ and contain crucial information about nodes, edges, and their respective weights.
+ Users can load these topologies directly into the tool’s graphical user interface (GUI)
+ for analysis and optimization. It’s important to ensure that the topology files adhere
+ to the specified format, with nodes listed first, followed by edges and their associated
+ weights.
+ 6.4 Setting Flow Demands
+ Once the desired topology is loaded, users can configure flow demands within the
+ network using the tool’s intuitive interface. Flow demands represent the desired
+ volume of traffic between specific source and destination nodes within the network.
+ Users can specify the source and destination nodes for each demand, along with the
+ desired demand size. For those looking to simulate diverse network scenarios, the
+ tool also offers the option to generate random flow demands automatically.
+ 21
+6.5 Running Optimization
+ At the heart of the Network Optimization Tool lies its powerful optimization engine,
+ which employs a sequential routing algorithm to optimize flow through the network.
+ This algorithm dynamically selects middle points based on betweenness centrality
+ and attempts routing for increasing numbers of middle points. After optimization,
+ users can view detailed routing results, including success counts for different config
+urations of middle points and the corresponding routing paths for successful demand
+ f
+ lows.
+ 6.6 Advanced Features
+ For users seeking more advanced customization options, the Network Optimization
+ Tool offers a range of features to tailor the optimization process to specific re
+quirements. Advanced users can customize parameters such as routing algorithms,
+ convergence criteria, and optimization strategies to fine-tune the tool’s behavior.
+ Additionally, the tool provides a command-line interface (CLI) for automated or
+ batch processing, allowing for seamless integration into existing workflows.
+ 6.7 Troubleshooting and Support
+ In the event of errors or unexpected behavior, users can refer to the troubleshooting
+ section in the documentation for guidance on resolving common issues. Furthermore,
+ users are encouraged to engage with the tool’s community forum or reach out to
+ the development team directly via email for additional assistance or feedback. Your
+ input is invaluable in helping us improve the tool and address user needs effectively.
+ 2
+ 
